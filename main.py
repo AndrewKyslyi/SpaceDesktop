@@ -1,5 +1,5 @@
-import kivy
-from kivy.app import App
+from kivy.uix.widget import Widget
+from kivymd.app import MDApp
 from kivy.uix.image import Image
 from kivy.clock import Clock
 from kivy.graphics.texture import Texture
@@ -7,12 +7,23 @@ import socket
 import cv2
 import numpy as np
 
-class VideoStreamApp(App):
+
+class SpaceDesktop(Widget):
+    pass
+
+
+class SpaceDesktopApp(MDApp):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.img = None
+        self.socket = None
+
     def build(self):
         self.img = Image()
-        Clock.schedule_interval(self.update_frame, 1.0/30.0)
+        Clock.schedule_interval(self.update_frame, 1.0/144.0)
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.socket.connect(('192.168.0.14', 8080))  # Replace 'PC_IP_ADDRESS' with your PC's IP address
+        self.socket.connect(('192.168.1.3', 10000))  # Replace 'PC_IP_ADDRESS' with your PC's IP address
+
         return self.img
 
     def update_frame(self, dt):
@@ -39,5 +50,6 @@ class VideoStreamApp(App):
         texture.flip_vertical()
         return texture
 
+
 if __name__ == '__main__':
-    VideoStreamApp().run()
+    SpaceDesktopApp().run()

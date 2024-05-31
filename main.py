@@ -1,33 +1,51 @@
 from kivy.uix.widget import Widget
 from kivymd.app import MDApp
+from kivy.lang import Builder
 from kivy.uix.image import Image
 from kivy.clock import Clock
 from kivy.graphics.texture import Texture
+from myIP import IP
+from SpaceDesktop import KV
+
 import socket
 import cv2
 import numpy as np
 
+callback = False
+
 
 class SpaceDesktop(Widget):
-    pass
+    def btn1_callback(self):
+        global callback
+        callback = True
 
 
 class SpaceDesktopApp(MDApp):
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.img = None
         self.socket = None
 
     def build(self):
+        global callback
         self.img = Image()
         Clock.schedule_interval(self.update_frame, 1.0/144.0)
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.socket.connect(('192.168.1.3', 10000))  # Replace 'PC_IP_ADDRESS' with your PC's IP address
+        self.socket.connect((IP, 10000))  # Replace 'PC_IP_ADDRESS' with your PC's IP address
+        self.theme_cls.theme_style = "Dark"
+        """if callback:
+            return self.img
+        else:
+            return Builder.load_string(KV)"""
+        return SpaceDesktop()
 
-        return self.img
 
     def update_frame(self, dt):
         # Receive frame size
+        global callback
+        if not callback:
+            return
         size = int.from_bytes(self.socket.recv(4), byteorder='big')
         
         # Receive frame data
@@ -49,6 +67,8 @@ class SpaceDesktopApp(MDApp):
         texture.blit_buffer(frame.tobytes(), colorfmt='rgb', bufferfmt='ubyte')
         texture.flip_vertical()
         return texture
+
+
 
 
 if __name__ == '__main__':

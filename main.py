@@ -2,6 +2,7 @@ from kivy.uix.widget import Widget
 from kivymd.app import MDApp
 from kivy.lang import Builder
 from kivy.uix.image import Image
+from kivy.uix.screenmanager import Screen, ScreenManager
 from kivy.clock import Clock
 from kivy.graphics.texture import Texture
 from myIP import IP
@@ -18,6 +19,7 @@ class SpaceDesktop(Widget):
     def btn1_callback(self):
         global callback
         callback = True
+        print(callback)
 
 
 class SpaceDesktopApp(MDApp):
@@ -34,10 +36,6 @@ class SpaceDesktopApp(MDApp):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket.connect((IP, 10000))  # Replace 'PC_IP_ADDRESS' with your PC's IP address
         self.theme_cls.theme_style = "Dark"
-        """if callback:
-            return self.img
-        else:
-            return Builder.load_string(KV)"""
         return SpaceDesktop()
 
 
@@ -67,8 +65,6 @@ class SpaceDesktopApp(MDApp):
         texture.blit_buffer(frame.tobytes(), colorfmt='rgb', bufferfmt='ubyte')
         texture.flip_vertical()
         return texture
-
-
 
 
 if __name__ == '__main__':

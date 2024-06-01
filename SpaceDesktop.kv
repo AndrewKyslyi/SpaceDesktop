@@ -7,6 +7,9 @@
             Rectangle:
                 size: root.width/2, root.height
                 pos: root.width - self.width, self.y
-    MDFlatButton:
-        text: "Kill me>o<"
-        on_press: app.stop()
+        MDFlatButton:
+            md_bg_color: .5,.5,.5,.5
+            size: 300, 200
+            size_hint: 1, 1
+            text: "Kill me>o<"
+            on_press: app.stop()

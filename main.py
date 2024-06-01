@@ -1,12 +1,12 @@
-from kivy.uix.widget import Widget
+from kivy.uix.widget import Widget, WidgetException
 from kivymd.app import MDApp
 from kivy.lang import Builder
 from kivy.uix.image import Image
-from kivy.uix.screenmanager import Screen, ScreenManager
 from kivy.clock import Clock
 from kivy.graphics.texture import Texture
+from kivymd.uix.button import MDFlatButton
+
 from myIP import IP
-from SpaceDesktop import KV
 
 import socket
 import cv2
@@ -15,11 +15,34 @@ import numpy as np
 callback = False
 
 
+def create_socket(ip, port=10000):
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.connect((ip, port))
+    return s
+
+
+def update_frame(img, sock, dt):
+    global callback
+    try:
+        size = int.from_bytes(sock.recv(4), byteorder='big')
+        frame_data = sock.recv(size, socket.MSG_WAITALL)  # Efficiently receive all data at once
+        np_data = np.frombuffer(frame_data, np.uint8)
+        frame = cv2.imdecode(np_data, cv2.IMREAD_COLOR)
+        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        img.texture = create_texture_from_frame(frame)
+    except Exception as e:
+        print(f"Error updating frame: {e}")
+
+
+def create_texture_from_frame(frame):
+    texture = Texture.create(size=(frame.shape[1], frame.shape[0]), colorfmt='rgb')
+    texture.blit_buffer(frame.tobytes(), colorfmt='rgb', bufferfmt='ubyte')
+    texture.flip_vertical()
+    return texture
+
+
 class SpaceDesktop(Widget):
-    def btn1_callback(self):
-        global callback
-        callback = True
-        print(callback)
+    pass
 
 
 class SpaceDesktopApp(MDApp):
@@ -32,39 +55,26 @@ class SpaceDesktopApp(MDApp):
     def build(self):
         global callback
         self.img = Image()
-        Clock.schedule_interval(self.update_frame, 1.0/144.0)
-        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.socket.connect((IP, 10000))  # Replace 'PC_IP_ADDRESS' with your PC's IP address
+        Clock.schedule_interval(lambda dt: update_frame(self.img, self.socket, dt), 1.0 / 60.0)
+        self.socket = create_socket(IP)  # Replace 'PC_IP_ADDRESS' with your PC's IP address
         self.theme_cls.theme_style = "Dark"
         return SpaceDesktop()
 
-
-    def update_frame(self, dt):
-        # Receive frame size
+    def btn1_callback(self, *args, **kwargs):
         global callback
-        if not callback:
+        self.img.size = self.root.size
+        if callback:
+            callback = False
+            self.root.clear_widgets()
+            btn = MDFlatButton(text="HAHA", on_release=self.btn1_callback)
+            self.root.add_widget(SpaceDesktop())
             return
-        size = int.from_bytes(self.socket.recv(4), byteorder='big')
-        
-        # Receive frame data
-        frame_data = b''
-        while len(frame_data) < size:
-            packet = self.socket.recv(size - len(frame_data))
-            if not packet:
+        else:
+            callback = True
+            try:
+                self.root.add_widget(self.img)
+            except WidgetException:
                 return
-            frame_data += packet
-        
-        # Decode and display frame
-        np_data = np.frombuffer(frame_data, np.uint8)
-        frame = cv2.imdecode(np_data, cv2.IMREAD_COLOR)
-        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        self.img.texture = self.create_texture_from_frame(frame)
-
-    def create_texture_from_frame(self, frame):
-        texture = Texture.create(size=(frame.shape[1], frame.shape[0]), colorfmt='rgb')
-        texture.blit_buffer(frame.tobytes(), colorfmt='rgb', bufferfmt='ubyte')
-        texture.flip_vertical()
-        return texture
 
 
 if __name__ == '__main__':

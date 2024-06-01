@@ -1,7 +1,9 @@
 <SpaceDesktop>:
-    #md_bg_color: app.theme_cls.surfaceColor
-    MDFlatButton:
-        text: "HAHA"
+    MDBoxLayout:
         size_hint: 1,1
-        font_size: 70
-        on_release: root.btn1_callback()
+        MDFlatButton:
+            #md_bg_color: 1,1,1,1
+            text: "HAHA"
+            size_hint: 1,1
+            font_size: 70
+            on_release: app.btn1_callback()

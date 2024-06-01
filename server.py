@@ -14,11 +14,11 @@ server_socket.listen(0)
 connection, address = server_socket.accept()
 print(f"Connection from: {address}")
 
+
 # Capture screen and stream
 while True:
     screenshot = pyautogui.screenshot()
-    frame = np.array(screenshot)
-    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    frame = cv2.cvtColor(np.array(screenshot), cv2.COLOR_BGR2RGB)
     
     # Encode frame
     ret, buffer = cv2.imencode('.png', frame)
@@ -27,8 +27,11 @@ while True:
     
     # Send frame size and frame
     size = len(buffer)
-    try:
+    connection.sendall(size.to_bytes(4, byteorder='big'))
+    connection.sendall(buffer.tobytes())
+    """try:
         connection.sendall(size.to_bytes(4, byteorder='big'))
         connection.sendall(buffer.tobytes())
     except ConnectionResetError:
         pass
+"""

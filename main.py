@@ -41,6 +41,10 @@ def create_texture_from_frame(frame):
     return texture
 
 
+class HostCard(Widget):
+    pass
+
+
 class SpaceDesktop(Widget):
     pass
 

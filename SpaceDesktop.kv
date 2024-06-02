@@ -5,11 +5,5 @@
             Color:
                 rgba: [1, 1, 1, 1]
             Rectangle:
-                size: root.width/2, root.height
-                pos: root.width - self.width, self.y
-        MDFlatButton:
-            md_bg_color: .5,.5,.5,.5
-            size: 300, 200
-            size_hint: 1, 1
-            text: "Kill me>o<"
-            on_press: app.stop()
+                size: root.width, root.height
+                pos: root.x, self.y

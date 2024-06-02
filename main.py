@@ -31,6 +31,8 @@ def update_frame(img, sock, dt):
         frame = cv2.imdecode(np_data, cv2.IMREAD_COLOR)
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         img.texture = create_texture_from_frame(frame)
+    except ConnectionResetError as er:
+        print(f"connection reset error {er}")
     except Exception as e:
         print(f"Error updating frame: {e}")
 
@@ -42,6 +44,10 @@ def create_texture_from_frame(frame):
     return texture
 
 
+class ElevatedMenu(Widget):
+    pass
+
+
 class SpaceDesktop(MDScreen):
     pass
 
@@ -49,7 +55,7 @@ class SpaceDesktop(MDScreen):
 class StreamingScreen(MDScreen):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.socket = create_socket(IP)
+        self.socket = create_socket(IP, 10000)
 
     def on_enter(self, *args):
         Clock.schedule_interval(lambda dt: update_frame(self.ids.streaming_img, self.socket, dt), 1.0 / 60.0)
@@ -94,13 +100,23 @@ class SpaceDesktopApp(MDApp):
             self.root.add_widget(self.img)
 
     def btn_start_streaming(self):
-        streaming_screen = self.sm.get_screen("streaming_screen")
-        streaming_screen.socket = create_socket(IP, 10000)
         self.sm.current = 'streaming_screen'
 
     def btn_stop_streaming(self):
         self.sm.current = 'main_screen'
-
+        # TODO Stop button must to close connect with server | 
+        # there is some part of code 👇
+        
+        """
+        stream = self.sm.get_screen("streaming_screen")
+        if stream:
+            stream.socket.close()
+            stream.socket = None
+    
+        # Остановка таймера обновления кадров
+        Clock.unschedule(None)
+        self.sm.current = "main_screen"
+        """
 
 if __name__ == '__main__':
     SpaceDesktopApp().run()

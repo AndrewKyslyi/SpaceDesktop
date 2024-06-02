@@ -18,8 +18,12 @@
                 Color:
                     rgba: [.5,.5,.5,.5]
                 Rectangle:
-                    size: settings.width, settings.height
-                    pos: settings.width, 0
+                    size: settings.size
+                    pos: (self.pos[0] + 5, self.pos[1] - 5)
+                Rectangle:
+                    size: settings.size
+                    pos: (settings.pos[0], settings.pos[1])
+                
             Widget:
 
             MDRectangleFlatButton:
@@ -33,8 +37,25 @@
                 on_release: app.btn_start_streaming()
 
 <StreamingScreen>:
+    md_bg_color: (0,0,0,0)
     streaming_screen: "streaming_screen"
     MDBoxLayout:
+        orientation: 'vertical'
         size: root.width, root.height
         AsyncImage:
             id: streaming_img
+
+    MDFloatLayout:
+        MDFlatButton:
+            line_color: (1,1,1,1)
+            pos: self.pos
+            size: 700, 150
+            text: "killme"
+            on_release: app.stop()
+
+        MDFlatButton:
+            line_color: (1,1,1,1)
+            pos: 100, 10
+            size: 700, 150
+            text: "stop"
+            on_release: app.btn_stop_streaming()            

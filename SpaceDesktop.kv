@@ -1,9 +1,33 @@
 <SpaceDesktop>:
-    BoxLayout:
+    MDBoxLayout:
+        size: root.width, root.height
         orientation: "horizontal"
-        canvas:
-            Color:
-                rgba: [1, 1, 1, 1]
-            Rectangle:
-                size: root.width, root.height
-                pos: root.x, self.y
+        size_hint: 1, 1
+
+        MDBoxLayout:
+            #size: root.width * 3 / 4, root.height
+            orientation: 'vertical'
+            size_hint: .25, 1
+
+        MDBoxLayout:
+            id: settings
+            orientation: 'vertical'
+            size_hint: .75, 1  # Установка размера второго вертикального BoxLayout
+
+            canvas.before:
+                Color:
+                    rgba: [.5,.5,.5,.5]
+                Rectangle:
+                    size: settings.width, settings.height
+                    pos: settings.width, 0
+            #Widget:
+
+            MDRectangleFlatButton:
+                text: "Add host"
+                size_hint: None, None
+                size: self.parent.width / 8, 40  # Размер кнопки зависит от ширины родительского Layout
+                pos_hint: {'center_x': 0.875, 'center_y': 0.05}
+                theme_text_color: "Custom"
+                text_color: "white"
+                line_color: "red"
+                on_release: app.btn1_callback()

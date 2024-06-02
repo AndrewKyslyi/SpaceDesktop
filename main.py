@@ -1,10 +1,11 @@
 from kivy.uix.widget import Widget, WidgetException
 from kivymd.app import MDApp
-from kivy.lang import Builder
 from kivy.uix.image import Image
 from kivy.clock import Clock
 from kivy.graphics.texture import Texture
 from kivymd.uix.button import MDFlatButton
+from kivymd.uix.screen import MDScreen
+from kivymd.uix.screenmanager import ScreenManager
 
 from myIP import IP
 
@@ -41,12 +42,17 @@ def create_texture_from_frame(frame):
     return texture
 
 
-class HostCard(Widget):
+class SpaceDesktop(MDScreen):
     pass
 
 
-class SpaceDesktop(Widget):
-    pass
+class StreamingScreen(MDScreen):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.socket = create_socket(IP)
+
+    def on_enter(self, *args):
+        Clock.schedule_interval(lambda dt: update_frame(self.ids.streaming_img, self.socket, dt), 1.0 / 60.0)
 
 
 class SpaceDesktopApp(MDApp):
@@ -55,14 +61,17 @@ class SpaceDesktopApp(MDApp):
         super().__init__(**kwargs)
         self.img = None
         self.socket = None
+        self.sm = ScreenManager()  # to manage screens. sm - ScreenManager
 
     def build(self):
         global callback
         self.img = Image()
-        Clock.schedule_interval(lambda dt: update_frame(self.img, self.socket, dt), 1.0 / 60.0)
-        self.socket = create_socket(IP)  # Replace 'PC_IP_ADDRESS' with your PC's IP address
+        self.sm.add_widget(SpaceDesktop(name="main_screen"))
+        self.sm.add_widget(StreamingScreen(name="streaming_screen"))
+        # Clock.schedule_interval(lambda dt: update_frame(self.img, self.socket, dt), 1.0 / 60.0)
+        # self.socket = create_socket(IP)  # Replace 'PC_IP_ADDRESS' with your PC's IP address
         self.theme_cls.theme_style = "Dark"
-        return SpaceDesktop()
+        return self.sm
 
     def btn1_callback(self, *args, **kwargs):
         global callback
@@ -70,15 +79,27 @@ class SpaceDesktopApp(MDApp):
         if callback:
             callback = False
             self.root.clear_widgets()
-            btn = MDFlatButton(text="HAHA", on_release=self.btn1_callback)
             self.root.add_widget(SpaceDesktop())
-            return
         else:
             callback = True
-            try:
-                self.root.add_widget(self.img)
-            except WidgetException:
-                return
+            btn = MDFlatButton(
+                text="Hello, World!",
+                on_release=self.btn1_callback,
+                md_bg_color=[1, 1, 1, 1],
+                theme_text_color="Custom",
+                text_color=[0, 0, 0, 0]
+            )
+            self.root.clear_widgets()
+            self.root.add_widget(btn)
+            self.root.add_widget(self.img)
+
+    def btn_start_streaming(self):
+        streaming_screen = self.sm.get_screen("streaming_screen")
+        streaming_screen.socket = create_socket(IP, 10000)
+        self.sm.current = 'streaming_screen'
+
+    def btn_stop_streaming(self):
+        self.sm.current = 'main_screen'
 
 
 if __name__ == '__main__':

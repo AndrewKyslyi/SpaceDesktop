@@ -20,7 +20,7 @@
                 Rectangle:
                     size: settings.width, settings.height
                     pos: settings.width, 0
-            #Widget:
+            Widget:
 
             MDRectangleFlatButton:
                 text: "Add host"
@@ -30,4 +30,11 @@
                 theme_text_color: "Custom"
                 text_color: "white"
                 line_color: "red"
-                on_release: app.btn1_callback()
+                on_release: app.btn_start_streaming()
+
+<StreamingScreen>:
+    streaming_screen: "streaming_screen"
+    MDBoxLayout:
+        size: root.width, root.height
+        AsyncImage:
+            id: streaming_img
